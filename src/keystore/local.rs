@@ -8,7 +8,6 @@ use hex::encode;
 pub struct LocalKeystore {}
 
 fn random_bytes(length: u32) -> Result<Vec<u8>, CKMError>{
-    let size: u32;
     match length {
         128 | 256 => {
             let size = length / 8;

@@ -24,8 +24,8 @@ mod tests {
 
     #[test]
     fn test_generate_entropy() {
-        let localKeystore = LocalKeystore::default();
-        keystore_test_entropy(localKeystore);
+        let local_keystore = LocalKeystore::default();
+        keystore_test_entropy(local_keystore);
     }
 
     
