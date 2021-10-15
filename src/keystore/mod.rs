@@ -29,7 +29,6 @@ mod tests {
     }
 
     
-
     fn keystore_test_entropy(keystore: impl Keystore) {
         let a = keystore.generate_entropy(128).unwrap();
         assert_eq!(a.len(), 32);

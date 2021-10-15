@@ -13,10 +13,10 @@ fn random_bytes(length: u32) -> Result<Vec<u8>, CKMError>{
         128 | 256 => {
             let size = length / 8;
             let mut key = vec![0u8; size.try_into().unwrap()];
-            let systemRandom = SystemRandom::new();
-            return match systemRandom.fill(&mut key) {
+            let system_random = SystemRandom::new();
+            return match system_random.fill(&mut key) {
                 Ok(_) => Ok(key),
-                Err(e) => Err(CKMError::NotFound("generate error".to_string()))
+                Err(_e) => Err(CKMError::NotFound("generate error".to_string()))
             };
         },
         _ => Err(CKMError::NotFound("length is not right".to_string())),
