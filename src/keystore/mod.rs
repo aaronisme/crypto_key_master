@@ -24,8 +24,9 @@ mod tests {
 
     #[test]
     fn test_generate_entropy() {
-        let local_keystore = LocalKeystore::default();
-        keystore_test_entropy(local_keystore);
+        let local_keystore = LocalKeystore::new();
+        // keystore_test_entropy(local_keystore);
+        keystore_write_key(local_keystore);
     }
 
     
@@ -34,6 +35,10 @@ mod tests {
         assert_eq!(a.len(), 32);
         let b = keystore.generate_entropy(256).unwrap();
         assert_eq!(b.len(), 64);
+    }
+
+    fn keystore_write_key(keystore: impl Keystore) {
+        let b = keystore.write_key("123", "456").unwrap();
     }
     
 }
