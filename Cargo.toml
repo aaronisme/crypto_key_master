@@ -11,3 +11,5 @@ bytes = "1.1.0"
 ring = "0.16.20"
 hex = "0.4.3"
 aes = { version = "0.7.5", features =["ctr"]}
+scrypt = { version = "0.2", default-features = false }
+sha3="0.7.3"
