@@ -5,19 +5,20 @@ pub use local::LocalKeystore;
 
 pub trait Keystore {
     /// generate the entropy to provide to outside world
-    fn generate_entropy(&self, length: u32) -> Result<String, CKMError>;
+    fn generate_entropy(&self, length: u32) -> Result<Vec<u8>, CKMError>;
 
     /// get the key by id
-    fn get_key(&self, password: &str, key_id: &str) -> Result<String, CKMError>;
+    fn get_key(&self, password: &str, key_id: String) -> Result<Vec<u8>, CKMError>;
 
     /// write key to store
-    fn write_key(self, password: &str, key: &str) -> Result<String, CKMError>;
+    fn write_key(&mut self, password: &str, key: &str) -> Result<String, CKMError>;
 }
 
 #[cfg(test)]
 mod tests {
 
     use super::*;
+    use std::str;
 
     #[test]
     fn test_generate_entropy() {
@@ -26,21 +27,17 @@ mod tests {
     }
 
     #[test]
-    fn test_write_key() {
+    fn test_get_write() {
         let mut local_keystore = LocalKeystore::new();
-        keystore_write_key(local_keystore);
+        let v = local_keystore.write_key("123", "456").unwrap();
+        let c = local_keystore.get_key("123", v).unwrap();
+        assert_eq!(str::from_utf8(&c).unwrap(), "456");
     }
 
     fn keystore_test_entropy(keystore: impl Keystore) {
         let a = keystore.generate_entropy(128).unwrap();
-        assert_eq!(a.len(), 32);
+        assert_eq!(a.len(), 16);
         let b = keystore.generate_entropy(256).unwrap();
-        assert_eq!(b.len(), 64);
-    }
-
-    fn keystore_write_key(keystore: impl Keystore) {
-        let v = keystore.write_key("123", "456").unwrap();
-        println!("{:?}", v);
-        assert_eq!(v, "123");
+        assert_eq!(b.len(), 32);
     }
 }

@@ -9,7 +9,13 @@ pub enum CKMError {
 
     #[error("random generator error")]
     RandomError,
-    
+
+    #[error("Key not exist")]
+    NotExist,
+
     #[error("none known error")]
     Unknown,
+
+    #[error("password invalid")]
+    PasswordInvalid,
 }
