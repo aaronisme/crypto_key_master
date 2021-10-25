@@ -6,7 +6,7 @@ pub struct Signature {
 
 
 pub trait KeyMaster {
-    fn sign(&self, path: &str, hex: &str, password: &str) -> Result<Signature, CKMError>;
+    fn sign(&self, path: &str, hex: &str, password: &str, curve: &str) -> Result<Signature, CKMError>;
 }
 
 
