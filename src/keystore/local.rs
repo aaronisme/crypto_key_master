@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::{collections::HashMap, convert::TryInto};
 use std::str;
+use std::convert::TryFrom;
 use std::fmt;
 
 use crate::*;
@@ -14,16 +15,15 @@ use ring::rand::{SecureRandom, SystemRandom};
 use scrypt::{scrypt, ScryptParams};
 use sha3::{Digest, Sha3_256};
 use serde::ser::{Serialize, Serializer, SerializeStruct};
-use serde::de::{self, Deserialize, Deserializer, Visitor, SeqAccess, MapAccess};
+use serde_json::Value;
+
 
 
 
 type HexBytes = Vec<u8>;
 
-#[derive(Debug, Clone, Default)]
-pub struct LocalKeystore {
-    keystores: HashMap<String, KeystoreObj>,
-}
+#[derive(Debug, Clone, Default, )]
+pub struct LocalKeystore {}
 
 impl LocalKeystore {
     pub fn new() -> Self {
@@ -153,22 +153,18 @@ impl Keystore for LocalKeystore {
     }
 
     fn get_key(&self, password: &str, key_id: String) -> Result<Vec<u8>, CKMError> {
-        let value = self.keystores.get(&key_id);
-        value
-        .ok_or(CKMError::NotExist)
-        .map(|obj| {
-            match _verify_password(&obj.mac, &password.to_string(), &obj.ciphertext) {
-                true => {
-                    let mut password_hash = vec![0; obj.kdfparams.dklen.try_into().unwrap()];
-                    let password_bytes = password.as_bytes();
-                    let salt =  &obj.kdfparams.salt;
-                    let params = ScryptParams::new(obj.kdfparams.log_n, obj.kdfparams.r, obj.kdfparams.p).unwrap();
-                    scrypt(password_bytes, salt, &params, &mut password_hash);
-                    _decrypt(&obj.ciphertext, &password_hash, &obj.cipherparams.iv)
-                },
-                false => todo!(),
-            }
-        })
+        let value = _read_keystore_file(key_id)?;    
+        match _verify_password(&value.mac, &password.to_string(), &value.ciphertext) {
+            true => {
+                let mut password_hash = vec![0; value.kdfparams.dklen.try_into().unwrap()];
+                let password_bytes = password.as_bytes();
+                let salt =  &value.kdfparams.salt;
+                let params = ScryptParams::new(value.kdfparams.log_n, value.kdfparams.r, value.kdfparams.p).unwrap();
+                scrypt(password_bytes, salt, &params, &mut password_hash);
+                Ok(_decrypt(&value.ciphertext, &password_hash, &value.cipherparams.iv))
+            },
+            false => Err(CKMError::PasswordInvalid),
+        }
     }
 
     fn write_key(&mut self, password: &str, key: &str) -> Result<String, CKMError> {
@@ -196,9 +192,8 @@ impl Keystore for LocalKeystore {
             kdf_params,
             mac_bytes.to_vec(),
         );
-        let serialized = serde_json::to_string(&keystore_obj).map_err(|_e| CKMError::NotExist)?;
+        let serialized = serde_json::to_string(&keystore_obj).map_err(|_e| CKMError::SerializeError)?;
         let file_name = encode(store_id);
-        println!("serialized = {}", serialized);
         _write_keystore_file(file_name, serialized)
     }
 }
@@ -256,11 +251,55 @@ fn _verify_password(mac: &Vec<u8>, password: &String, ciphertext: &Vec<u8>) -> b
 
 fn _write_keystore_file(file_name: String, content: String) -> Result<String, CKMError> {
     let path = Path::new(&file_name);
-    File::create(&path).map(|mut f| {
-        f.write_all(content.as_bytes()).map_err(|_e| CKMError::NotExist);
-    })
-    .map(|_| file_name).
-    map_err(|_e| CKMError::NotExist)
+    let mut file = File::create(&path).map_err(|_e| CKMError::FileGenerationError)?;
+    file.write_all(content.as_bytes()).map_err(|_e| CKMError::FileError)?;
+    Ok(file_name)
+}
+
+fn _read_keystore_file(file_name: String) -> Result<KeystoreObj, CKMError> {
+    let path = Path::new(&file_name);
+    let mut file = File::open(&path).map_err(|_e| CKMError::FileNotExit)?;
+    let mut s = String::new();
+    let _ = file.read_to_string(&mut s).map_err(|_e| CKMError::FileReadError);
+
+   
+
+    let v: Value = serde_json::from_str(s.as_str()).map_err(|_e| CKMError::FileReadError)?;
+    
+    let ciphertext = v.get("ciphertext").ok_or(CKMError::FileReadError)?;
+
+    let ciphertext = ciphertext.as_str().ok_or(CKMError::FileReadError)?;
+
+    let ciphertext_bytes = decode(ciphertext).map_err(|_e| CKMError::FileReadError)?;
+
+    
+    let iv = v["cipherparams"]["iv"].as_str().ok_or(CKMError::FileReadError)?;
+
+    let iv = decode(iv).map_err(|_e| CKMError::FileReadError)?;
+    let cipherparams = Cipherparams::new(iv);
+
+    let salt = v["kdfparams"]["salt"].as_str().ok_or(CKMError::FileReadError)?;
+
+
+
+    let salt = decode(salt).map_err(|_e| CKMError::FileReadError)?;
+
+
+    let mac = v["mac"].as_str().ok_or(CKMError::FileReadError)?;
+    let mac = decode(mac).map_err(|_e| CKMError::FileReadError)?;
+
+    let kdfparams = Kdfparams {
+        salt,
+        ..Default::default()
+    };
+
+
+    Ok(KeystoreObj::new(
+        ciphertext_bytes,
+        cipherparams,
+        kdfparams,
+        mac,
+    ))
 }
 
 

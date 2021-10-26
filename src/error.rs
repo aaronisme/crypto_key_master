@@ -18,4 +18,19 @@ pub enum CKMError {
 
     #[error("password invalid")]
     PasswordInvalid,
+
+    #[error("serialize error")]
+    SerializeError,
+
+    #[error("file generaeting error")]
+    FileGenerationError,
+
+    #[error("file write error")]
+    FileError,
+
+    #[error("file not exit")]
+    FileNotExit,
+
+    #[error("reading file error")]
+    FileReadError,
 }
