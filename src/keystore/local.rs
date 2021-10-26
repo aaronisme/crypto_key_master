@@ -1,5 +1,9 @@
+use std::path::Path;
+use std::fs::File;
+use std::io::prelude::*;
 use std::{collections::HashMap, convert::TryInto};
 use std::str;
+use std::fmt;
 
 use crate::*;
 use aes::cipher::generic_array::GenericArray;
@@ -9,6 +13,12 @@ use hex::{encode, decode};
 use ring::rand::{SecureRandom, SystemRandom};
 use scrypt::{scrypt, ScryptParams};
 use sha3::{Digest, Sha3_256};
+use serde::ser::{Serialize, Serializer, SerializeStruct};
+use serde::de::{self, Deserialize, Deserializer, Visitor, SeqAccess, MapAccess};
+
+
+
+type HexBytes = Vec<u8>;
 
 #[derive(Debug, Clone, Default)]
 pub struct LocalKeystore {
@@ -23,20 +33,20 @@ impl LocalKeystore {
 
 #[derive(Debug, Clone)]
 struct KeystoreObj {
-    ciphertext: Vec<u8>,
+    ciphertext: HexBytes,
     cipher: String,
     cipherparams: Cipherparams,
     kdf: String,
     kdfparams: Kdfparams,
-    mac: Vec<u8>,
+    mac: HexBytes,
 }
 
 impl KeystoreObj {
     fn new(
-        ciphertext: Vec<u8>,
+        ciphertext: HexBytes,
         cipherparams: Cipherparams,
         kdfparams: Kdfparams,
-        mac: Vec<u8>,
+        mac: HexBytes,
     ) -> Self {
         Self {
             ciphertext,
@@ -49,9 +59,25 @@ impl KeystoreObj {
     }
 }
 
+impl Serialize for KeystoreObj {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("KeystoreObj", 6)?;
+        state.serialize_field("ciphertext", &encode(&self.ciphertext))?;
+        state.serialize_field("cipher", &self.cipher)?;
+        state.serialize_field("cipherparams", &self.cipherparams)?;
+        state.serialize_field("kdf", &self.kdf)?;
+        state.serialize_field("kdfparams", &self.kdfparams)?;
+        state.serialize_field("mac", &encode(&self.mac))?;
+        state.end()
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 struct Cipherparams {
-    iv: Vec<u8>,
+    iv: HexBytes,
 }
 
 impl Cipherparams {
@@ -60,10 +86,20 @@ impl Cipherparams {
     }
 }
 
+impl Serialize for Cipherparams {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+        let mut state = serializer.serialize_struct("Cipherparams", 1)?;
+        state.serialize_field("iv", &encode(&self.iv))?;
+        state.end()
+    }
+}
+
 #[derive(Debug, Clone)]
 struct Kdfparams {
     dklen: u32,
-    salt: Vec<u8>,
+    salt: HexBytes,
     log_n: u8,
     r: u32,
     p: u32,
@@ -78,6 +114,21 @@ impl Default for Kdfparams {
             p: 1,
             salt: Vec::new(),
         }
+    }
+}
+
+
+impl Serialize for Kdfparams {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+        let mut state = serializer.serialize_struct("Kdfparams", 5)?;
+        state.serialize_field("dklen", &self.dklen)?;
+        state.serialize_field("salt", &encode(&self.salt))?;
+        state.serialize_field("log_n", &self.log_n)?;
+        state.serialize_field("r", &self.r)?;
+        state.serialize_field("p", &self.p)?;
+        state.end()
     }
 }
 
@@ -145,9 +196,10 @@ impl Keystore for LocalKeystore {
             kdf_params,
             mac_bytes.to_vec(),
         );
-        self.keystores.insert(encode(store_id), keystore_obj);
-        println!("{:?}", self.keystores);
-        Ok(encode(store_id))
+        let serialized = serde_json::to_string(&keystore_obj).map_err(|_e| CKMError::NotExist)?;
+        let file_name = encode(store_id);
+        println!("serialized = {}", serialized);
+        _write_keystore_file(file_name, serialized)
     }
 }
 
@@ -200,6 +252,15 @@ fn _verify_password(mac: &Vec<u8>, password: &String, ciphertext: &Vec<u8>) -> b
     hasher.input(&pass_bytes);
     let mac_bytes = hasher.result();
     mac == &mac_bytes.to_vec()
+}
+
+fn _write_keystore_file(file_name: String, content: String) -> Result<String, CKMError> {
+    let path = Path::new(&file_name);
+    File::create(&path).map(|mut f| {
+        f.write_all(content.as_bytes()).map_err(|_e| CKMError::NotExist);
+    })
+    .map(|_| file_name).
+    map_err(|_e| CKMError::NotExist)
 }
 
 
