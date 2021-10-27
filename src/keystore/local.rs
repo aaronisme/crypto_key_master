@@ -1,11 +1,8 @@
 use std::path::Path;
 use std::fs::File;
 use std::io::prelude::*;
-use std::{collections::HashMap, convert::TryInto};
+use std::{convert::TryInto};
 use std::str;
-use std::convert::TryFrom;
-use std::fmt;
-
 use crate::*;
 use aes::cipher::generic_array::GenericArray;
 use aes::cipher::{StreamCipher, StreamCipherSeek};
