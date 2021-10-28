@@ -5,6 +5,7 @@ mod curve;
 
 pub use keystore::*;
 pub use keymaster::*;
+pub use curve::*;
 pub use error::CKMError;
 
 
