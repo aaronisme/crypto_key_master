@@ -1,4 +1,4 @@
-use crate:: {Keystore, LocalKeystore};
+use crate:: {Keystore, LocalKeystore, CKMError};
 
 pub struct Signature {
     r: String,
@@ -12,10 +12,10 @@ pub enum Curve {
     Ed25519(String),
 }
 
-pub struct SignRequest {
-    path: &str,
+pub struct SignRequest<'a> {
+    path: &'a str,
     unsigend_data: Vec<u8>,
-    key_id: &str,
+    key_id: &'a str,
     curve: Curve
 }
 
@@ -52,7 +52,7 @@ impl<Store: Keystore> KeyMaster<Store> {
 
 pub fn dispatch(signRequest: SignRequest, store: &impl Keystore) ->Result<Signature, CKMError> {
     match signRequest.curve {
-        Curve::Secp256k1 => K1.sign(store, signRequest),
+        Curve::Secp256k1(_) => todo!(),
         _ => todo!()
     }
 

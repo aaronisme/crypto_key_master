@@ -1,7 +1,10 @@
 mod keystore;
+mod keymaster;
 mod error;
+mod curve;
 
-pub use keystore::Keystore;
+pub use keystore::*;
+pub use keymaster::*;
 pub use error::CKMError;
 
 
