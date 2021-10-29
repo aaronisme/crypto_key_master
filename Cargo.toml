@@ -18,3 +18,4 @@ serde_bytes = "0.11.5"
 serde_json = "1.0"
 ecdsa = { version = "0.12.4", features =["sign"]}
 k256 = "0.9.6"
+bip32 = "0.2.2"

@@ -10,6 +10,6 @@ pub struct SigningSignature {
 
 
 pub trait CurveSign {
-    fn derive_key(&self, path: &str, password: &str, store: &impl Keystore) -> Result<Vec<u8>, CKMError>;
-    fn sign(&self, request: SignRequest, password: &str, store: &impl Keystore) -> Result<SigningSignature, CKMError>;
+    fn derive_key(&self, request: &SignRequest, password: &str, store: &impl Keystore) -> Result<Vec<u8>, CKMError>;
+    fn sign(&self, request: &SignRequest, password: &str, store: &impl Keystore) -> Result<SigningSignature, CKMError>;
 }

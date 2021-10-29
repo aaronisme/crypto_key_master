@@ -1,4 +1,4 @@
-use crate:: {Keystore, LocalKeystore, CKMError};
+use crate:: {Keystore, LocalKeystore, CKMError, SigningSignature};
 
 
 
@@ -34,7 +34,7 @@ impl<Store: Keystore> KeyMaster<Store> {
         }
     }
 
-    pub fn sign(&self, signRequest: SignRequest) -> Result<Signature, CKMError>{
+    pub fn sign(&self, signRequest: SignRequest) -> Result<SigningSignature, CKMError>{
         todo!()
     }
 
@@ -46,7 +46,7 @@ impl<Store: Keystore> KeyMaster<Store> {
 
 }
 
-pub fn dispatch(signRequest: SignRequest, store: &impl Keystore) ->Result<Signature, CKMError> {
+pub fn dispatch(signRequest: SignRequest, store: &impl Keystore) ->Result<SigningSignature, CKMError> {
     match signRequest.curve {
         Curve::Secp256k1(_) => todo!(),
         _ => todo!()
