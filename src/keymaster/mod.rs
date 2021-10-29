@@ -1,10 +1,6 @@
 use crate:: {Keystore, LocalKeystore, CKMError};
 
-pub struct Signature {
-    r: String,
-    s: String,
-    v: Option<String>,
-}
+
 
 pub enum Curve {
     Secp256k1(String),
@@ -13,10 +9,10 @@ pub enum Curve {
 }
 
 pub struct SignRequest<'a> {
-    path: &'a str,
-    unsigend_data: Vec<u8>,
-    key_id: &'a str,
-    curve: Curve
+    pub path: &'a str,
+    pub unsigend_data: Vec<u8>,
+    pub key_id: &'a str,
+    pub curve: Curve
 }
 
 

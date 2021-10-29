@@ -1,8 +1,15 @@
-use crate::{Signature,SignRequest, Keystore, CKMError};
+use crate::{SignRequest, Keystore, CKMError};
 
 mod k1;
 
+pub struct SigningSignature {
+    r: String,
+    s: String,
+    v: Option<String>,
+}
+
+
 pub trait CurveSign {
-    fn derive_key(&self, store: &impl Keystore, path: &str) -> Result<String, CKMError>;
-    fn sign(&self, request: SignRequest, store: &impl Keystore) -> Result<String, CKMError>;
+    fn derive_key(&self, path: &str, password: &str, store: &impl Keystore) -> Result<Vec<u8>, CKMError>;
+    fn sign(&self, request: SignRequest, password: &str, store: &impl Keystore) -> Result<SigningSignature, CKMError>;
 }
