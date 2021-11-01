@@ -33,4 +33,7 @@ pub enum CKMError {
 
     #[error("reading file error")]
     FileReadError,
+
+    #[error("Signing issue")]
+    SigningError,
 }

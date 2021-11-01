@@ -19,7 +19,7 @@ use serde_json::Value;
 
 type HexBytes = Vec<u8>;
 
-#[derive(Debug, Clone, Default, )]
+#[derive(Debug, Clone, Default)]
 pub struct LocalKeystore {}
 
 impl LocalKeystore {

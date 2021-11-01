@@ -2,6 +2,7 @@ use crate::{SignRequest, Keystore, CKMError};
 
 mod k1;
 
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct SigningSignature {
     r: String,
     s: String,

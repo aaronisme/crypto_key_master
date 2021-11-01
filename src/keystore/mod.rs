@@ -1,4 +1,5 @@
 pub mod local;
+pub mod fake;
 
 use crate::CKMError;
 pub use local::LocalKeystore;
