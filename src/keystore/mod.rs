@@ -1,5 +1,5 @@
-pub mod local;
 pub mod fake;
+pub mod local;
 
 use crate::CKMError;
 pub use local::LocalKeystore;
@@ -12,7 +12,7 @@ pub trait Keystore {
     fn get_key(&self, password: &str, key_id: String) -> Result<Vec<u8>, CKMError>;
 
     /// write key to store
-    fn write_key(&mut self, password: &str, key: &str) -> Result<String, CKMError>;
+    fn write_key(&mut self, password: &str, key: String) -> Result<String, CKMError>;
 }
 
 #[cfg(test)]
@@ -30,7 +30,7 @@ mod tests {
     #[test]
     fn test_get_write() {
         let mut local_keystore = LocalKeystore::new();
-        let v = local_keystore.write_key("123", "456").unwrap();
+        let v = local_keystore.write_key("123", "456".to_string()).unwrap();
         let c = local_keystore.get_key("123", v).unwrap();
         assert_eq!(str::from_utf8(&c).unwrap(), "456");
     }

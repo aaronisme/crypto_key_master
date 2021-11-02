@@ -1,4 +1,4 @@
-use crate:: {Keystore, CKMError};
+use crate::{CKMError, Keystore};
 use hex::decode;
 
 #[derive(Debug, Clone, Default)]
@@ -16,8 +16,7 @@ impl Keystore for FakeKeystore {
         Ok(result)
     }
 
-    fn write_key(&mut self, password: &str, key: &str) -> Result<String, crate::CKMError> {
+    fn write_key(&mut self, password: &str, key: String) -> Result<String, crate::CKMError> {
         Ok("123456".to_string())
     }
 }
-
