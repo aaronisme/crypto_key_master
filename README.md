@@ -6,7 +6,7 @@ crypto_key_master is the rust library for helping manage crypto keys
 [![Crates.io][crates-badge]][crates-url]
 
 [crates-badge]: https://img.shields.io/crates/v/crypto_key_master.svg
-[crates-url]: https://crates.io/crates/bytes
+[crates-url]: https://crates.io/crates/crypto_key_master
 
 [Documentation](https://docs.rs/crypto_key_master)
 
@@ -16,7 +16,7 @@ To use `crypto_key_master`, first add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-crypto_key_master = "0.1.0"
+crypto_key_master = "0.1.2"
 ```
 
 Next, add this to your crate:
