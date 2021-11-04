@@ -2,6 +2,11 @@
 name = "crypto_key_master"
 version = "0.1.0"
 edition = "2018"
+license = "MIT"
+description = "rust library for crypto key management"
+readme = "README.md"
+homepage = "https://github.com/aaronisme/crypto_key_master"
+repository = "https://github.com/aaronisme/crypto_key_master"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
