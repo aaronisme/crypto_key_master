@@ -1,6 +1,6 @@
 use crate::{CKMError, Keystore, SignRequest};
 
-pub mod k1;
+pub(crate) mod k1;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct SigningSignature {

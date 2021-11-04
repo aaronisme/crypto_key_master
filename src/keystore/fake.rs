@@ -2,7 +2,7 @@ use crate::{CKMError, Keystore};
 use hex::decode;
 
 #[derive(Debug, Clone, Default)]
-pub struct FakeKeystore {}
+pub(crate) struct FakeKeystore {}
 
 impl Keystore for FakeKeystore {
     fn generate_entropy(&self, length: u32) -> Result<Vec<u8>, CKMError> {

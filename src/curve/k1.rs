@@ -10,7 +10,7 @@ use ecdsa::{
 use hex::*;
 use k256::Secp256k1;
 
-pub struct K1 {}
+pub(crate) struct K1 {}
 
 impl CurveSign for K1 {
     fn derive_key(
@@ -57,7 +57,7 @@ fn _k1_sign_message(key_bytes: &[u8], message_bytes: &[u8]) -> Result<SigningSig
 
 #[cfg(test)]
 mod tests {
-    use crate::{fake::FakeKeystore, Curve};
+    use crate::{keystore::fake::FakeKeystore, Curve};
 
     use super::*;
     use hex::encode;

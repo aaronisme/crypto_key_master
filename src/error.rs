@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+/// Crypto key master error defination
 #[derive(Debug, Error)]
 pub enum CKMError {
     #[error("not found {0}")]

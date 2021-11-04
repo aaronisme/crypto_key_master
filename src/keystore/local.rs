@@ -17,6 +17,8 @@ use std::str;
 type HexBytes = Vec<u8>;
 
 #[derive(Debug, Clone, Default)]
+/// local keystore defination
+/// keys are stored on your file system
 pub struct LocalKeystore {}
 
 impl LocalKeystore {

@@ -1,9 +1,10 @@
-pub mod fake;
-pub mod local;
+pub(crate) mod fake;
+mod local;
 
 use crate::CKMError;
 pub use local::LocalKeystore;
 
+/// Keystore trait for storing keys, it can be local file or secure element etc.
 pub trait Keystore {
     /// generate the entropy to provide to outside world
     fn generate_entropy(&self, length: u32) -> Result<Vec<u8>, CKMError>;
